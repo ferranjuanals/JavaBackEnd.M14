@@ -13,7 +13,6 @@ import springrestapi.exercici.dto.CollarRequestDto;
 import springrestapi.exercici.dto.CollarResponseDto;
 import springrestapi.exercici.entities.Collar;
 import springrestapi.exercici.exception.DuplicateCollarException;
-import springrestapi.exercici.exception.ShopMaxCapacityException;
 import springrestapi.exercici.repositories.CollarRepository;
 
 @Service
@@ -23,10 +22,8 @@ public class CollarService {
 	CollarRepository collarRepository;
 	
 	public void addCollar(CollarRequestDto dto) {
-		if(collarRepository.countByShopId(dto.getShop().getId()) >= dto.getShop().getCapacity()) throw new ShopMaxCapacityException(dto.getShop().getName(), dto.getShop().getCapacity());
-		Collar collar = this.mapDtoToEntity(dto);
-		if(collarRepository.exists(Example.of(collar))) throw new DuplicateCollarException(collar.getName(), collar.getAuthor().getName());
-		collarRepository.save(collar);
+		if(collarRepository.exists(Example.of(this.mapDtoToEntity(dto)))) throw new DuplicateCollarException(dto.getName(), dto.getAuthor().getName());
+		collarRepository.save(this.mapDtoToEntity(dto));
 	}
 	
 	public List<CollarResponseDto> getCollarsByShopId(Long id) {
@@ -35,6 +32,10 @@ public class CollarService {
 	
 	public List<CollarResponseDto> getCollars() {
 		return collarRepository.findAll().stream().map(collar -> this.mapEntityToResponseDto(collar)).collect(Collectors.toList());
+	}
+
+	public Integer countCollarsByShop(Long shopId) {
+		return collarRepository.countByShopId(shopId);
 	}
 	
 	@Transactional
@@ -48,9 +49,7 @@ public class CollarService {
 		entity.setPrice(dto.getPrice());
 		entity.setEntryDate(LocalDate.now());
 		entity.setShop(dto.getShop());
-		if(dto.getAuthor() != null) {
-			entity.setAuthor(dto.getAuthor());
-		}		
+		entity.setAuthor(dto.getAuthor());	
 		return entity;
 	}
 	

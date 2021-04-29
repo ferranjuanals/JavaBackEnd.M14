@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import springrestapi.exercici.dto.CollarRequestDto;
 import springrestapi.exercici.dto.CollarResponseDto;
-import springrestapi.exercici.entities.Shop;
-import springrestapi.exercici.services.AuthorService;
-import springrestapi.exercici.services.CollarService;
+import springrestapi.exercici.dto.ShopDto;
 import springrestapi.exercici.services.ShopService;
 
 @RestController
@@ -20,47 +18,39 @@ public class ShopController {
 	@Autowired
 	private ShopService shopService;
 	
-	@Autowired
-	private CollarService collarService;
-	
-	@Autowired
-	private AuthorService authorService;
-	
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void addShop(@RequestBody Shop shop) {
-		shopService.saveShop(shop);
+	public ShopDto addShop(@RequestBody ShopDto shopDto) {
+		return shopService.addShop(shopDto);
 	}
 	
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public List<Shop> getShops() {
+	public List<ShopDto> getShops() {
 		return shopService.getShops();
 	}	
 	
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Shop getShopById(@PathVariable("id") Long shopId) {
-		return shopService.getShopById(shopId);
+	public ShopDto getShop(@PathVariable("id") Long shopId) {
+		return shopService.getShop(shopId);
 	}
 	
 	@PostMapping(path = "/{id}/collars")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void addCollarToShop(@PathVariable("id") Long shopId, @RequestBody CollarRequestDto collarDto) {
-		collarDto.setShop(shopService.getShopById(shopId));
-		collarDto.setAuthor(authorService.checkAuthorByName(collarDto.getAuthor()));
-		collarService.addCollar(collarDto);
+	public void addCollarToShop(@PathVariable("id") Long shopId, @RequestBody CollarRequestDto requestDto) {
+		shopService.addCollarToShop(shopId, requestDto);
 	}
 	
 	@GetMapping(path = "/{id}/collars")  
 	@ResponseStatus(HttpStatus.OK)
-	public List<CollarResponseDto> getCollarsByShop(@PathVariable("id") Long id) {
-		return collarService.getCollarsByShopId(id);
+	public List<CollarResponseDto> getCollarsByShop(@PathVariable("id") Long shopId) {
+		return shopService.getCollarsByShopId(shopId);
 	}
 	
 	@DeleteMapping(path = "{id}/collars")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public void deleteAllCollarsByShop(@PathVariable("id") Long id) {
-		collarService.deleteAllCollarsByShopId(id);
+	public void deleteAllCollarsByShop(@PathVariable("id") Long shopId) {
+		shopService.deleteAllCollarsByShopId(shopId);
 	}
 }
