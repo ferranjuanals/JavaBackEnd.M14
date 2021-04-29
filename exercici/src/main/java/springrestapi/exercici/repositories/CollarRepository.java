@@ -15,4 +15,5 @@ public interface CollarRepository extends JpaRepository<Collar, Long> {
 	public int countByShopId(long id);
 	
 	public void deleteByShopId(long id);
+	
 }
